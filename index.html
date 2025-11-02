@@ -1,40 +1,347 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <link rel="icon" type="image/svg+xml" href="/webstorm-icon-logo.svg" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>WS playground</title>
-  <link rel="stylesheet" href="/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plan 5 Student Loan Calculator</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Use Inter font --> 
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbar for the table */
+        .table-container::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        .table-container::-webkit-scrollbar-thumb {
+            background-color: #4b5563; /* gray-600 */
+            border-radius: 4px;
+        }
+        .table-container::-webkit-scrollbar-track {
+            background-color: #1f2937; /* gray-800 */
+        }
+    </style>
 </head>
-<body>
-<header class="logo">
-  <a href="https://www.jetbrains.com/webstorm/">
-    <img src="/webstorm-logo.svg" alt="WebStorm logo" width="344"
-         height="90">
-  </a>
-</header>
-<main id="app">
-  <h1 class="title">
-    Thank you for trying it out. <br /> Your first project is up and running
-    now.
-  </h1>
-  <section class="counter">
-    <div class="counter-info">
-      <p class="counter-text">Counter is</p>
-      <p class="counter-value" id="counter-value"></p>
+<body class="bg-gray-900 text-gray-100 p-4 md:p-8 min-h-screen antialiased">
+
+<div class="max-w-7xl mx-auto">
+    <!-- Main grid: 1 col for form, 2 cols for results -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+        <!-- Column 1: Inputs -->
+        <div class="lg:col-span-1 bg-gray-800 p-6 rounded-2xl shadow-lg h-fit">
+            <h1 class="text-3xl font-bold text-white mb-2">Plan 5 Loan Calculator</h1>
+            <p class="text-gray-400 mb-6">See your full loan journey, from study to payoff.</p>
+
+            <form id="calc-form" class="space-y-5">
+                <!-- New Toggle -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">How to enter your loan?</label>
+                    <div class="flex rounded-lg bg-gray-700 p-1">
+                        <button id="toggle-total" type="button" class="w-1/2 py-2 rounded-md text-sm font-medium bg-blue-600 text-white transition-all">Total Debt</button>
+                        <button id="toggle-calculate" type="button" class="w-1/2 py-2 rounded-md text-sm font-medium text-gray-400 hover:text-white transition-all">Calculate Debt</button>
+                    </div>
+                </div>
+
+                <!-- Wrapper for Method 1: Total Debt -->
+                <div id="total-debt-inputs">
+                    <div>
+                        <label for="loan-amount" class="block text-sm font-medium text-gray-300 mb-1">Current Loan Amount (£)</label>
+                        <input type="number" id="loan-amount" value="45000" class="w-full bg-gray-700 text-white border-gray-600 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" required>
+                    </div>
+                </div>
+
+                <!-- Wrapper for Method 2: Calculate Debt (Hidden by default) -->
+                <div id="calculate-debt-inputs" class="space-y-5 hidden">
+                    <div>
+                        <label for="annual-loan" class="block text-sm font-medium text-gray-300 mb-1">Annual Loan Amount (£)</label>
+                        <input type="number" id="annual-loan" value="10000" class="w-full bg-gray-700 text-white border-gray-600 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                    </div>
+                    <div>
+                        <label for="course-length" class="block text-sm font-medium text-gray-300 mb-1">Course Length (years)</label>
+                        <input type="number" id="course-length" value="3" class="w-full bg-gray-700 text-white border-gray-600 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+                    </div>
+                </div>
+
+                <!-- Shared Inputs -->
+                <div>
+                    <label for="current-salary" class="block text-sm font-medium text-gray-300 mb-1">Starting Salary (£)</label>
+                    <input type="number" id="current-salary" value="30000" class="w-full bg-gray-700 text-white border-gray-600 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" required>
+                </div>
+
+                <div>
+                    <label for="salary-increase" class="block text-sm font-medium text-gray-300 mb-1">Annual Salary Increase (%)</label>
+                    <input type="number" id="salary-increase" value="3" step="0.1" class="w-full bg-gray-700 text-white border-gray-600 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" required>
+                </div>
+
+                <div>
+                    <label for="interest-rate" class="block text-sm font-medium text-gray-300 mb-1">Assumed Interest Rate (RPI) (%)</label>
+                    <input type="number" id="interest-rate" value="3.2" step="0.1" class="w-full bg-gray-700 text-white border-gray-600 rounded-lg p-3 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" required>
+                </div>
+
+                <!-- Plan 5 Rules Display -->
+                <div class="bg-gray-700 p-4 rounded-lg">
+                    <h4 class="font-semibold text-white">Plan 5 Rules:</h4>
+                    <ul class="list-disc list-inside text-gray-300 text-sm mt-2">
+                        <li>Repayment: 9% on income over £25,000</li>
+                        <li>Write-off: After 40 years</li>
+                    </ul>
+                </div>
+
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition duration-200 text-lg">
+                    Calculate Repayment
+                </button>
+            </form>
+        </div>
+
+        <!-- Column 2: Results -->
+        <div id="results-container" class="lg:col-span-2 hidden">
+            <h2 class="text-3xl font-bold text-white mb-6">Your Repayment Journey</h2>
+
+            <!-- Summary Cards -->
+            <div id="results-summary" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div class="bg-gray-800 p-5 rounded-2xl shadow-lg">
+                    <h3 class="text-sm font-medium text-gray-400 uppercase tracking-wide">Outcome</h3>
+                    <p id="summary-outcome" class="text-2xl font-bold text-white mt-1">-</p>
+                </div>
+                <div class="bg-gray-800 p-5 rounded-2xl shadow-lg">
+                    <h3 class="text-sm font-medium text-gray-400 uppercase tracking-wide">Total Repaid</h3>
+                    <p id="summary-total-paid" class="text-2xl font-bold text-white mt-1">-</p>
+                </div>
+                <div class="bg-gray-800 p-5 rounded-2xl shadow-lg">
+                    <h3 class="text-sm font-medium text-gray-400 uppercase tracking-wide">Total Interest Added</h3>
+                    <p id="summary-total-interest" class="text-2xl font-bold text-white mt-1">-</p>
+                </div>
+                <!-- Written-off card (shown as needed) -->
+                <div id="summary-written-off-card" class="bg-red-900/50 p-5 rounded-2xl shadow-lg hidden md:col-span-3">
+                    <h3 class="text-sm font-medium text-red-300 uppercase tracking-wide">Amount Written Off</h3>
+                    <p id="summary-written-off" class="text-2xl font-bold text-white mt-1">-</p>
+                </div>
+            </div>
+
+            <!-- Year-by-Year Table -->
+            <h3 class="text-2xl font-bold text-white mb-4">Annual Breakdown</h3>
+            <div class="bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
+                <div class="table-container overflow-y-auto max-h-[70vh]">
+                    <table class="w-full min-w-[600px] text-left">
+                        <thead class="bg-gray-700 sticky top-0">
+                        <tr>
+                            <th class="p-4 font-semibold text-gray-300">Year</th>
+                            <th class="p-4 font-semibold text-gray-300">Salary</th>
+                            <th class="p-4 font-semibold text-gray-300">Annual Repayment</th>
+                            <th class="p-4 font-semibold text-gray-300">Interest Added</th>
+                            <th class="p-4 font-semibold text-gray-300">End Balance</th>
+                        </tr>
+                        </thead>
+                        <tbody id="results-tbody" class="divide-y divide-gray-700">
+                        <!-- Rows will be injected here by JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </div>
-    <div class="counter-interaction">
-      <button id="increaseByOne" type="button">+1</button>
-      <button id="increaseByTwo" type="button">+2</button>
-      <button id="decreaseByOne" type="button">-1</button>
-      <button id="decreaseByTwo" type="button">-2</button>
-    </div>
-  </section>
-</main>
-<footer class="technologies">
-  <img src="/technologies.svg" alt="List of supported technologies">
-</footer>
-<script type="module" src="/src/main.js"></script>
+</div>
+
+<script>
+    // --- Get DOM Elements ---
+    const calcForm = document.getElementById('calc-form');
+    const resultsContainer = document.getElementById('results-container');
+    const resultsTbody = document.getElementById('results-tbody');
+
+    const summaryOutcome = document.getElementById('summary-outcome');
+    const summaryTotalPaid = document.getElementById('summary-total-paid');
+    const summaryTotalInterest = document.getElementById('summary-total-interest');
+    const summaryWrittenOffCard = document.getElementById('summary-written-off-card');
+    const summaryWrittenOff = document.getElementById('summary-written-off');
+
+    // --- New Toggle Elements ---
+    const toggleTotalBtn = document.getElementById('toggle-total');
+    const toggleCalculateBtn = document.getElementById('toggle-calculate');
+    const totalDebtInputs = document.getElementById('total-debt-inputs');
+    const calculateDebtInputs = document.getElementById('calculate-debt-inputs');
+    let calculationMode = 'total'; // 'total' or 'calculate'
+
+
+    // --- Helper Function ---
+    /**
+     * Formats a number as GBP currency.
+     * @param {number} amount - The number to format.
+     * @returns {string} - The formatted currency string.
+     */
+    function formatCurrency(amount) {
+        return new Intl.NumberFormat('en-GB', {
+            style: 'currency',
+            currency: 'GBP',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(amount);
+    }
+
+    // --- Toggle Button Event Listeners ---
+    toggleTotalBtn.addEventListener('click', () => {
+        calculationMode = 'total';
+        totalDebtInputs.classList.remove('hidden');
+        calculateDebtInputs.classList.add('hidden');
+
+        // Style buttons
+        toggleTotalBtn.classList.add('bg-blue-600', 'text-white');
+        toggleTotalBtn.classList.remove('text-gray-400', 'hover:text-white');
+        toggleCalculateBtn.classList.add('text-gray-400', 'hover:text-white');
+        toggleCalculateBtn.classList.remove('bg-blue-600', 'text-white');
+    });
+
+    toggleCalculateBtn.addEventListener('click', () => {
+        calculationMode = 'calculate';
+        totalDebtInputs.classList.add('hidden');
+        calculateDebtInputs.classList.remove('hidden');
+
+        // Style buttons
+        toggleCalculateBtn.classList.add('bg-blue-600', 'text-white');
+        toggleCalculateBtn.classList.remove('text-gray-400', 'hover:text-white');
+        toggleTotalBtn.classList.add('text-gray-400', 'hover:text-white');
+        toggleTotalBtn.classList.remove('bg-blue-600', 'text-white');
+    });
+
+    // --- Form Submit Event ---
+    calcForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        calculateRepayment();
+    });
+
+    // --- Calculation Logic ---
+    function calculateRepayment() {
+        // 1. Get user inputs
+        const interestRate = parseFloat(document.getElementById('interest-rate').value) / 100;
+        let currentSalary = parseFloat(document.getElementById('current-salary').value);
+        const salaryIncrease = parseFloat(document.getElementById('salary-increase').value) / 100;
+
+        // 2. Define Plan 5 rules
+        const repaymentThreshold = 25000;
+        const repaymentPercentage = 0.09;
+        const writeOffYears = 40;
+
+        // 3. Initialize simulation variables
+        let currentLoan = 0;
+        let totalPaid = 0;
+        let totalInterestAccrued = 0;
+        let tableHtml = '';
+
+        // 4. --- NEW: Study Years Calculation ---
+        if (calculationMode === 'calculate') {
+            const annualLoan = parseFloat(document.getElementById('annual-loan').value);
+            const courseLength = parseInt(document.getElementById('course-length').value);
+
+            for (let i = 1; i <= courseLength; i++) {
+                const yearLabel = `Year ${i - courseLength} (Study)`;
+
+                // Add loan at start of year
+                currentLoan += annualLoan;
+                // Calculate interest on the new total
+                const annualInterest = currentLoan * interestRate;
+                // Add interest at end of year
+                currentLoan += annualInterest;
+
+                totalInterestAccrued += annualInterest;
+
+                tableHtml += `
+                        <tr class="bg-gray-700/50">
+                            <td class="p-4 font-medium text-gray-400">${yearLabel}</td>
+                            <td class="p-4 text-gray-500">Studying</td>
+                            <td class="p-4 text-gray-500">£0</td>
+                            <td class="p-4 text-gray-400">${formatCurrency(annualInterest)}</td>
+                            <td class="p-4 font-semibold text-gray-300">${formatCurrency(currentLoan)}</td>
+                        </tr>`;
+            }
+        } else {
+            currentLoan = parseFloat(document.getElementById('loan-amount').value);
+        }
+
+        // 5. --- Repayment Years Calculation ---
+        let yearsPassed = 0;
+        let isPaidOff = false;
+
+        for (let year = 1; year <= writeOffYears; year++) {
+            if (isPaidOff) break;
+
+            yearsPassed = year;
+
+            // Calculate interest *before* repayment
+            const annualInterest = currentLoan * interestRate;
+            totalInterestAccrued += annualInterest;
+
+            // Calculate repayment
+            let annualRepayment = 0;
+            const taxableIncome = currentSalary - repaymentThreshold;
+            if (taxableIncome > 0) {
+                annualRepayment = taxableIncome * repaymentPercentage;
+            }
+
+            // Check for final payment
+            if (currentLoan + annualInterest <= annualRepayment) {
+                const finalRepayment = currentLoan + annualInterest;
+                totalPaid += finalRepayment;
+
+                tableHtml += `
+                        <tr class="bg-green-900/30">
+                            <td class="p-4 font-medium">Year${year}</td>
+                            <td class="p-4">${formatCurrency(currentSalary)}</td>
+                            <td class="p-4 font-medium text-green-300">${formatCurrency(finalRepayment)}</td>
+                            <td class="p-4">${formatCurrency(annualInterest)}</td>
+                            <td class="p-4 font-bold text-green-300">${formatCurrency(0)}</td>
+                        </tr>`;
+
+                currentLoan = 0;
+                isPaidOff = true;
+
+            } else {
+                // Standard year payment
+                currentLoan += annualInterest - annualRepayment;
+                totalPaid += annualRepayment;
+
+                tableHtml += `
+                        <tr class="hover:bg-gray-700/50">
+                            <td class="p-4 text-gray-300">Year${year}</td>
+                            <td class="p-4 text-gray-300">${formatCurrency(currentSalary)}</td>
+                            <td class="p-4 text-gray-300">${formatCurrency(annualRepayment)}</td>
+                            <td class="p-4 text-gray-300">${formatCurrency(annualInterest)}</td>
+                            <td class="p-4 text-gray-300">${formatCurrency(currentLoan)}</td>
+                        </tr>`;
+
+                // Update salary for next year
+                currentSalary *= (1 + salaryIncrease);
+            }
+        }
+
+        // 6. Display the results
+        resultsTbody.innerHTML = tableHtml;
+
+        // Populate summary cards
+        summaryTotalPaid.textContent = formatCurrency(totalPaid);
+        summaryTotalInterest.textContent = formatCurrency(totalInterestAccrued);
+
+        if (isPaidOff) {
+            summaryOutcome.textContent = `Paid off in ${yearsPassed} years`;
+            summaryWrittenOffCard.classList.add('hidden');
+        } else {
+            summaryOutcome.textContent = `Written off after ${writeOffYears} years`;
+            summaryWrittenOff.textContent = formatCurrency(currentLoan); // The remaining balance
+            summaryWrittenOffCard.classList.remove('hidden');
+        }
+
+        // Show the results section
+        resultsContainer.classList.remove('hidden');
+
+        // Scroll to results on mobile
+        if (window.innerWidth < 1024) {
+            resultsContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+    }
+</script>
 </body>
 </html>
+
